@@ -1,0 +1,54 @@
+Server | Client | Method
+-------+--------+--------
+       | Client | callHierarchy/incomingCalls
+       | Client | callHierarchy/outgoingCalls
+Server |        | client/registerCapability
+Server |        | client/unregisterCapability
+       | Client | codeAction/resolve
+       | Client | codeLens/resolve
+       | Client | completionItem/resolve
+       | Client | documentLink/resolve
+       | Client | initialize
+       | Client | shutdown
+       | Client | textDocument/codeAction
+       | Client | textDocument/codeLens
+       | Client | textDocument/colorPresentation
+       | Client | textDocument/completion
+       | Client | textDocument/declaration
+       | Client | textDocument/definition
+       | Client | textDocument/documentColor
+       | Client | textDocument/documentHighlight
+       | Client | textDocument/documentLink
+       | Client | textDocument/documentSymbol
+       | Client | textDocument/foldingRange
+       | Client | textDocument/formatting
+       | Client | textDocument/hover
+       | Client | textDocument/implementation
+       | Client | textDocument/linkedEditingRange
+       | Client | textDocument/moniker
+       | Client | textDocument/onTypeFormatting
+       | Client | textDocument/prepareCallHierarchy
+       | Client | textDocument/prepareRename
+       | Client | textDocument/rangeFormatting
+       | Client | textDocument/references
+       | Client | textDocument/rename
+       | Client | textDocument/selectionRange
+       | Client | textDocument/semanticTokens/full
+       | Client | textDocument/semanticTokens/full/delta
+       | Client | textDocument/semanticTokens/range
+       | Client | textDocument/signatureHelp
+       | Client | textDocument/typeDefinition
+       | Client | textDocument/willSaveWaitUntil
+Server |        | window/showDocument
+Server |        | window/showMessageRequest
+Server |        | window/workDoneProgress/create
+Server |        | workspace/applyEdit
+Server |        | workspace/codeLens/refresh
+Server |        | workspace/configuration
+       | Client | workspace/executeCommand
+       | Client | workspace/semanticTokens/refresh
+       | Client | workspace/symbol
+       | Client | workspace/willCreateFiles
+       | Client | workspace/willDeleteFiles
+       | Client | workspace/willRenameFiles
+Server |        | workspace/workspaceFolders

@@ -1,0 +1,90 @@
+<?php
+
+declare(strict_types=1);
+
+use Talbergs\Diode;
+
+abstract class Mapper
+{
+    /**
+     * Recursively casts  into PHP structure.
+     * Succeeds if all structure fields were initialized.
+     * Succeeds if JSON has only known fileds.
+     */
+    public static function tryInto(array $json): static
+    {
+        $instance = new static;
+        $reflection = new ReflectionClass(static::class);
+
+        foreach ($json as $key => $value) {
+            if (is_array($value)) {
+                $type = $reflection->getProperty($key)->getType()->getName();
+                $value = (new $type)::tryInto($value);
+            }
+            $reflection->getProperty($key)->setValue($instance, $value);
+        }
+
+        return $instance;
+    }
+}
+
+class A extends Mapper
+{
+    public string $a;
+    public B $b;
+    public ?int $c = null;
+    public int $d;
+}
+
+class B extends Mapper
+{
+    public string $c;
+}
+
+/**
+ *
+ *
+ * Diode is static (for single client server process) component that
+ * acts as a dynamic router and stands in outer most layer of this application.
+ * It solves the dynamic routing part - the fact that some actions should only
+ * become available, if user has sent Init request.
+ */
+class DiodeTest extends PHPUnit\Framework\TestCase
+{
+    public function testItAcceptsUnknownMethods()
+    {
+        Diode::accept(id: 1, method: 'subtract', params: [1, 2]);
+        $this->assertTrue(true);
+    }
+
+    public function testItEveluatesUnknownMethodIntoError()
+    {
+        Diode::accept(id: 1, method: 'subtract', params: [1, 2]);
+        $this->assertTrue(true);
+    }
+
+    public function testItEvaluatesRegisteredMethods()
+    {
+        $method = 'sum';
+
+        Diode::register($method, fn (array $params) => array_sum($params));
+        Diode::accept(id: 1, method: $method, params: [1, 2, 3]);
+
+        [$id, $result] = Diode::receive();
+
+        $this->assertEquals(1 + 2 + 3, $result);
+    }
+
+    public function test1()
+    {
+        $now = microtime(true);
+        foreach (range(1,1000000) as $_) {
+            $i = A::tryInto(json_decode('{"a":2, "b": {"c":3}}', true));
+            // var_dump($i);die;
+        }
+        var_dump(microtime(true) - $now);die;
+
+        $r = new ReflectionClass(InitializeParams::class);
+        var_dump($r->getProperties()[1]->getType()->getName());
+    }
+}

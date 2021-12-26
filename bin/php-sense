@@ -1,0 +1,79 @@
+#!/usr/bin/php
+<?php
+
+require __DIR__ . '/../vendor/autoload.php';
+
+// // IDEAL OUTLINE?
+// //////////////////////
+// function handleRequest(RPC $evt) {
+// }
+// function handleNotification(RPC $evt) {
+//     if ($msg = $evt->getInitializeParams()) {
+//     }
+//     if ($msg = $evt->getCodeAction()) {
+//     }
+//     throw new \Exception();
+// }
+// while ($evt = IO::reveive()) {
+//     if ($evt->isNotification()) {
+//         handleNotification($evt);
+//     } elseif ($evt->isRequest()) {
+//         handleRequest($evt);
+//     }
+//     throw new \Exception();
+// }
+
+// use Talbergs\Server;
+
+// Server::boot();
+
+// class Foo {
+//     #[ExampleAttribute('Hello world', 42)]
+//     function a() {}
+// }
+
+// #[Attribute]
+// class ExampleAttribute {
+//     private string $message;
+//     private int $answer;
+//     public function __construct(string $message, int $answer) {
+//         $this->message = $message;
+//         $this->answer = $answer;
+//     }
+// }
+
+// $reflector = new \ReflectionClass(Foo::class);
+// $m = $reflector->getMethods();
+
+// foreach ($m as $mm) {
+// foreach ($attrs as $attriubute) {
+
+//     $attriubute->getName(); // "My\Attributes\ExampleAttribute"
+//     $attriubute->getArguments(); // ["Hello world", 42]
+//     $x = $attriubute->newInstance();
+//     var_dump($x);
+//         // object(ExampleAttribute)#1 (2) {
+//         //  ["message":"Foo":private]=> string(11) "Hello World"        
+//         //  ["answer":"Foo":private]=> int(42) 
+//         // }
+// }
+// }
+//
+
+use Revolt\EventLoop;
+// use Talbergs\Events;
+
+// while (1) {
+//     sleep(1);
+// }
+
+// EventLoop::onReadable(STDIN, fn ($a) => Events::gotMessage($a));
+EventLoop::onReadable(STDIN, fn ($a) => file_put_contents('/tmp/aa', $a, FILE_APPEND));
+
+// fputs(STDIN, "ss");
+// EventLoop::defer(fn () => Events::gotMessage("a"));
+
+EventLoop::run();
+
+// fwrite(STDOUT, "oo");
+// fwrite(STDERR, "oo1");
