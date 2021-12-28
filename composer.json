@@ -29,6 +29,7 @@
     "scripts": {
         "tinker": "composer repl",
         "test": "./vendor/bin/phpunit",
+        "watch": "git ls-files | entr composer test",
         "coverage": "./vendor/bin/phpunit --coverage-html build/coverage",
         "stan": "./vendor/bin/phpstan analyze -c phpstan.neon src"
     }

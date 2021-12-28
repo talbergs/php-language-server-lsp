@@ -199,6 +199,11 @@ namespace PHPUnit\Framework {
                     '{"settings":{"intelephense":{"environment":{"shortOpenTag":false},"completion":{"triggerParameterHints":false}}}}',
                     \Talbergs\LSP\DidChangeConfigurationParams::class,
                 ],
+                [
+                    // textDocument/publishDiagnostics notification [server]->[client]
+                    '{"uri":"file:///home/ada/Projects/php-language-server-lsp/src/LSP/DidChangeConfigurationClientCapabilities.php","diagnostics":[{"range":{"start":{"line":16,"character":4},"end":{"line":16,"character":6}},"message":"Unexpected \'Name\'.","severity":1,"code":1001,"source":"intelephense"}]}',
+                    \Talbergs\LSP\PublishDiagnosticsParams::class,
+                ],
             ];
         }
 
