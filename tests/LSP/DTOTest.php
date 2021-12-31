@@ -214,6 +214,11 @@ namespace PHPUnit\Framework {
                     '{"sortText":"public","textEdit":{"range":{"start":{"line":16,"character":4},"end":{"line":16,"character":5}},"newText":"public"},"label":"public","kind":14}',
                     \Talbergs\LSP\CompletionItem::class,
                 ],
+                [
+                    // textDocument/completion request [client]->[server]
+                    '{"context":{"triggerCharacter":">","triggerKind":2},"position":{"line":18,"character":15},"textDocument":{"uri":"file:\\/\\/\\/home\\/ada\\/Projects\\/php-language-server-lsp\\/src\\/LSP\\/DidChangeConfigurationClientCapabilities.php"}}',
+                    \Talbergs\LSP\CompletionParams::class,
+                ],
             ];
         }
 
