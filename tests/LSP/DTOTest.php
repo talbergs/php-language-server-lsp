@@ -204,6 +204,16 @@ namespace PHPUnit\Framework {
                     '{"uri":"file:///home/ada/Projects/php-language-server-lsp/src/LSP/DidChangeConfigurationClientCapabilities.php","diagnostics":[{"range":{"start":{"line":16,"character":4},"end":{"line":16,"character":6}},"message":"Unexpected \'Name\'.","severity":1,"code":1001,"source":"intelephense"}]}',
                     \Talbergs\LSP\PublishDiagnosticsParams::class,
                 ],
+                [
+                    // textDocument/didChange notification [client]->[server]
+                    '{"contentChanges":[{"rangeLength":1,"range":{"start":{"line":16,"character":5},"end":{"line":16,"character":6}},"text":""}],"textDocument":{"uri":"file:\\/\\/\\/home\\/ada\\/Projects\\/php-language-server-lsp\\/src\\/LSP\\/DidChangeConfigurationClientCapabilities.php","version":7}}',
+                    \Talbergs\LSP\DidChangeTextDocumentParams::class,
+                ],
+                [
+                    // completionItem/resolve request [client]->[server]
+                    '{"sortText":"public","textEdit":{"range":{"start":{"line":16,"character":4},"end":{"line":16,"character":5}},"newText":"public"},"label":"public","kind":14}',
+                    \Talbergs\LSP\CompletionItem::class,
+                ],
             ];
         }
 
