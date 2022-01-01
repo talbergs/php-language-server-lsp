@@ -219,6 +219,26 @@ namespace PHPUnit\Framework {
                     '{"context":{"triggerCharacter":">","triggerKind":2},"position":{"line":18,"character":15},"textDocument":{"uri":"file:\\/\\/\\/home\\/ada\\/Projects\\/php-language-server-lsp\\/src\\/LSP\\/DidChangeConfigurationClientCapabilities.php"}}',
                     \Talbergs\LSP\CompletionParams::class,
                 ],
+                [
+                    // textDocument/completion response [server]->[client]
+                    '{"isIncomplete":false,"items":[{"label":"public","kind":14,"textEdit":{"range":{"start":{"line":16,"character":4},"end":{"line":16,"character":5}},"newText":"public"},"sortText":"public"},{"label":"private","kind":14,"textEdit":{"range":{"start":{"line":16,"character":4},"end":{"line":16,"character":5}},"newText":"private"},"sortText":"private"},{"label":"protected","kind":14,"textEdit":{"range":{"start":{"line":16,"character":4},"end":{"line":16,"character":5}},"newText":"protected"},"sortText":"protected"}]}',
+                    \Talbergs\LSP\CompletionList::class,
+                ],
+                [
+                    // textDocument/didOpen notification [client]->[server]
+                    '{"textDocument":{"uri":"file:\/\/\/home\/ada\/Projects\/php-language-server-lsp\/src\/LSP\/CodeActionKind.php","languageId":"php","version":0,"text":"<?php\n\ndeclare(strict_types=1);"}}',
+                    \Talbergs\LSP\DidOpenTextDocumentParams::class,
+                ],
+                [
+                    // workspace/configuration notification [server]->[client]
+                    '{"items":[{"section":"intelephense"},{"section":"intelephense","scopeUri":"file:///home/ada/Projects/php-language-server-lsp"}]}',
+                    \Talbergs\LSP\ConfigurationParams::class,
+                ],
+                [
+                    // textDocument/didSave notification [client]->[server]
+                    '{"textDocument":{"uri":"file:\\/\\/\\/home\\/ada\\/Projects\\/php-language-server-lsp\\/src\\/LSP\\/DidChangeConfigurationClientCapabilities.php"}}',
+                    \Talbergs\LSP\DidSaveTextDocumentParams::class,
+                ],
             ];
         }
 
