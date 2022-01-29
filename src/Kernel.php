@@ -24,7 +24,7 @@ use Talbergs\LSP\PublishDiagnosticsParams;
 
 final class Kernel
 {
-    static ThroughStream $channel;
+    static WritableResourceStream $channel;
 
     public static function listen()
     {
@@ -32,33 +32,36 @@ final class Kernel
 
         $stdin = new ReadableResourceStream(STDIN, $loop);
         $stdout = new WritableResourceStream(STDOUT, $loop);
-        $channel = new ThroughStream();
 
-        self::$channel = $channel;
-        $stdin->on('data', fn (string $data) => self::handleInput($data, $channel));
-
-        $channel->pipe($stdout);
-        // $channel->on('data', fn (string $data) => $stdout->write($data));
-        // $channel->on('data', [$channel, 'write']);
+        self::$channel = $stdout;
+        $stdin->on('data', fn (string $data) => self::handleInput($data));
 
         $loop->addPeriodicTimer(1, function(){});
         $loop->run();
     }
 
-    private static function handleInput(string $data, ThroughStream $output)
+    private static function handleInput(string $data)
     {
         $data = HTTP::recv($data);
         $data = JsonRpc::recv($data);
 
-        if (array_key_exists('id', $data)) {
-            ['method' => $method, 'params' => $params] = $data + ['params' => null];
+        [
+            'method' => $method,
+            'params' => $params,
+            'id' => $id,
+        ] = $data + [
+            'method' => '',
+            'params' => null,
+            'id' => null,
+        ];
+
+        if ($id !== null) {
             match ($method) {
                 'initialize' => self::handleInitializeRequest($data['id'], InitializeParams::fromArr($params)),
                 'shutdown' => self::handleShutdownRequest($data['id']),
                 'textDocument/hover' => self::handleHoverRequest($data['id'], HoverParams::fromArr($params)),
             };
         } else {
-            ['method' => $method, 'params' => $params] = $data;
             match ($method) {
                 'initialized' =>  self::handleInitializedNotification(InitializedParams::fromArr($params)),
                 'workspace/didChangeConfiguration' => self::handleDidChangeConfigurationNotification(DidChangeConfigurationParams::fromArr($params)),
@@ -69,8 +72,7 @@ final class Kernel
     }
 
     public static function handleShutdownRequest(int $id)
-    {
-    }
+    {}
 
     public static function handleTextDocumentDidOpenNotification(DidOpenTextDocumentParams $params)
     {}
