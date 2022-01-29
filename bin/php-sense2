@@ -1,0 +1,191 @@
+#!/usr/bin/php
+<?php
+
+function l($txt) {
+    if (is_array($txt)) {
+        $txt = json_encode($txt);
+    }
+    file_put_contents('/tmp/php-sense-log', '###'.PHP_EOL.trim($txt).PHP_EOL.'###'.PHP_EOL, FILE_APPEND);
+}
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use React\Stream\CompositeStream;
+use React\Stream\ReadableResourceStream;
+use React\Stream\WritableResourceStream;
+use React\Stream\ThroughStream;
+use React\EventLoop\Loop;
+use Revolt\EventLoop;
+use Talbergs\LSP\DidChangeConfigurationParams;
+use Talbergs\LSP\DidOpenTextDocumentParams;
+use Talbergs\LSP\Hover;
+use Talbergs\LSP\HoverParams;
+use Talbergs\LSP\InitializeResult\InitializeResult;
+use Talbergs\STDIO;
+
+l("started");
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', '/tmp/php-sense-log');
+
+stream_set_blocking(STDIN, false);
+dd(stream_get_meta_data(STDIN));
+
+EventLoop::queue(fn () => l('QUEUED'));
+// stream_set_blocking(STDIN, false);
+// stream_set_blocking(STDOUT, false);
+
+// EventLoop::onWritable(STDOUT, fn() => l("WRITEABLE?"));
+// EventLoop::onWritable(STDOUT, function () {echo "WRITEABLE?";});
+EventLoop::onReadable(STDIN, function ($id, $socket) {
+    // echo stream_get_contents(STDIN);
+    // return;
+
+
+    l("STDIN readable!");
+    if (!is_resource($socket) || @feof($socket)) {
+        l("Canceled stream!");
+        EventLoop::cancel($id);
+    }
+
+    $sepIdx = 0;
+    $sep = '    ';
+    $header = '';
+    while ($sep !== "\r\n\r\n") {
+        $char = fread($socket, 1);
+        // Where is the NULL byte comming from?
+        if (0 === ord($char)) {
+            continue;
+        }
+        $header .= $char;
+        $sep[$sepIdx] = $char;
+        $sepIdx = ($sepIdx + 1) % 4;
+    }
+
+    l(trim($header));
+
+    preg_match('/content-length:\s?(?P<length>\d+)/i', $header, $matches);
+    $body = fread($socket, (int) $matches['length']);
+    $body = json_decode($body, true);
+    // RPC
+    $id = $body['id'] ?? 0;
+    $method = $body['method'] ?? '';
+    $params = $body['params'];
+
+    l(compact('id', 'method'));
+    if ($method === 'initialize') {
+        $res = InitializeResult::fromJson('{"capabilities":{"textDocumentSync":2,"documentSymbolProvider":true,"workspaceSymbolProvider":true,"completionProvider":{"triggerCharacters":["$",">",":","\\\\","/","*",".","<"],"resolveProvider":true},"signatureHelpProvider":{"triggerCharacters":["(",",",":"]},"definitionProvider":true,"documentFormattingProvider":true,"documentRangeFormattingProvider":true,"referencesProvider":true,"hoverProvider":true,"documentHighlightProvider":true,"foldingRangeProvider":true,"implementationProvider":true,"declarationProvider":true,"workspace":{"workspaceFolders":{"supported":true,"changeNotifications":true}},"renameProvider":{"prepareProvider":true},"typeDefinitionProvider":true,"selectionRangeProvider":true,"codeActionProvider":true,"executeCommandProvider":{"commands":["intelephense.import.symbol","intelephense.implement.abstract.method.all","intelephense.phpdoc.add"]}}}');
+        $x = json_encode([
+            'id' => $id,
+            'result' => $res->toArr(),
+            "jsonrpc" => "2.0",
+        ]);
+
+        fwrite(STDOUT, implode("\r\n", [
+            "Content-Length: " . strlen($x),
+            '',
+            $x,
+        ]));
+    }
+
+    if ($method === 'initialized') {
+        // just a notification
+    }
+
+    if ($method === 'workspace/didChangeConfiguration') {
+        DidChangeConfigurationParams::fromArr($params);
+    }
+
+    if ($method === 'textDocument/didOpen') {
+        DidOpenTextDocumentParams::fromArr($params);
+    }
+
+    if ($method === 'textDocument/hover') {
+        HoverParams::fromArr($params);
+        $simulatedResponse = '{"contents":{"kind":"markdown","value":"balls"},"range":{"start":{"line":2,"character":0},"end":{"line":2,"character":3}}}';
+        $res = Hover::fromJson($simulatedResponse);
+        $x = json_encode([
+            'id' => $id,
+            'result' => $res->toArr(),
+            "jsonrpc" => "2.0",
+        ]);
+
+        fwrite(STDOUT, implode("\r\n", [
+            "Content-Length: " . strlen($x),
+            '',
+            $x,
+        ]));
+    }
+});
+
+EventLoop::run();
+
+l("ENDED");
+die;
+
+// for now only STDIN/STDOUT support
+
+// // IDEAL OUTLINE?
+// //////////////////////
+// function handleRequest(RPC $evt) {
+//     if ($msg = $evt->completionItemResolve()) {
+//        // ..do work..
+//        $evt->io->respond();
+//     }
+// }
+// function handleNotification(RPC $evt) {
+//     if ($msg = $evt->getInitializeParams()) {
+//     }
+//     if ($msg = $evt->getCodeAction()) {
+//     }
+//     throw new \Exception();
+// }
+// while ($evt = IO::reveive()) {
+//     if ($evt->isNotification()) {
+//         handleNotification($evt);
+//     } elseif ($evt->isRequest()) {
+//         handleRequest($evt);
+//     }
+//     throw new \Exception();
+// }
+
+// use Talbergs\Server;
+
+// Server::boot();
+
+// class Foo {
+//     #[ExampleAttribute('Hello world', 42)]
+//     function a() {}
+// }
+
+// #[Attribute]
+// class ExampleAttribute {
+//     private string $message;
+//     private int $answer;
+//     public function __construct(string $message, int $answer) {
+//         $this->message = $message;
+//         $this->answer = $answer;
+//     }
+// }
+
+// $reflector = new \ReflectionClass(Foo::class);
+// $m = $reflector->getMethods();
+
+// foreach ($m as $mm) {
+// foreach ($attrs as $attriubute) {
+
+//     $attriubute->getName(); // "My\Attributes\ExampleAttribute"
+//     $attriubute->getArguments(); // ["Hello world", 42]
+//     $x = $attriubute->newInstance();
+//     var_dump($x);
+//         // object(ExampleAttribute)#1 (2) {
+//         //  ["message":"Foo":private]=> string(11) "Hello World"        
+//         //  ["answer":"Foo":private]=> int(42) 
+//         // }
+// }
+// }
+//
+
+
+// fwrite(STDOUT, "oo");
+// fwrite(STDERR, "oo1");

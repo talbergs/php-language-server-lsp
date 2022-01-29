@@ -239,6 +239,17 @@ namespace PHPUnit\Framework {
                     '{"textDocument":{"uri":"file:\\/\\/\\/home\\/ada\\/Projects\\/php-language-server-lsp\\/src\\/LSP\\/DidChangeConfigurationClientCapabilities.php"}}',
                     \Talbergs\LSP\DidSaveTextDocumentParams::class,
                 ],
+
+                [
+                    // textDocument/hover request [client]->[server]
+                    '{"position":{"line":2,"character":0},"textDocument":{"uri":"file:\\/\\/\\/home\\/ada\\/Projects\\/php-language-server-lsp\\/php-test-file.sense"}}',
+                    \Talbergs\LSP\HoverParams::class,
+                ],
+                [
+                    // textDocument/hover response [server]->[client]
+                    '{"contents":{"kind":"markdown","value":"_@var_ `int $var111`"},"range":{"start":{"line":4,"character":0},"end":{"line":4,"character":7}}}',
+                    \Talbergs\LSP\Hover::class,
+                ],
             ];
         }
 
