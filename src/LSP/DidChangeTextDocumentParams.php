@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace Talbergs\LSP;
 
+/**
+ * The document change notification is sent from the client to the server to
+ * signal changes to a text document. Before a client can change a text
+ * document it must claim ownership of its content using the
+ * textDocument/didOpen notification. In 2.0 the shape of the params has
+ * changed to include proper version numbers.
+ */
 class DidChangeTextDocumentParams extends DTO
 {
     /**

@@ -6,6 +6,9 @@
     </include>
   </coverage>
   <testsuites>
+    <testsuite name="TestingUnits">
+      <directory>./src</directory>
+    </testsuite>
     <testsuite name="AllTests">
       <directory>./tests</directory>
     </testsuite>

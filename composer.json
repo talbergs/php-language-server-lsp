@@ -6,8 +6,6 @@
         "php": "^8.0",
         "talbergs/tree-sitter": "0.19.0-rc3",
         "talbergs/tree-sitter-php": "0.19.0-rc3",
-        "revolt/event-loop": "dev-main",
-        "felixfbecker/language-server-protocol": "^1.5",
         "react/stream": "^1.2"
     },
     "require-dev": {
@@ -30,6 +28,7 @@
     "scripts": {
         "tinker": "composer repl",
         "test": "./vendor/bin/phpunit",
+        "var-dumper": "./vendor/bin/var-dump-server",
         "watch": "git ls-files | entr composer test",
         "coverage": "./vendor/bin/phpunit --coverage-html build/coverage",
         "stan": "./vendor/bin/phpstan analyze -c phpstan.neon src"

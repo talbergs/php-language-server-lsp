@@ -6,6 +6,9 @@ namespace Talbergs\LSP;
 
 use Talbergs\LSP\ClientCapabilities\ClientCapabilities;
 
+/**
+ * @link https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#initializeParams
+ */
 class InitializeParams extends DTO
 {
     use WorkDoneProgressParams;
@@ -44,6 +47,8 @@ class InitializeParams extends DTO
 
     /**
      * The capabilities provided by the client (editor or tool)
+     *
+     * @link https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#clientCapabilities
      */
     public ClientCapabilities $capabilities;
 

@@ -9,7 +9,7 @@ class TextDocumentContentChangeEvent extends DTO
     /**
      * The range of the document that changed.
      */
-    public Range $range;
+    public ?Range $range = null;
 
     /**
      * The optional length of the range that got replaced.
