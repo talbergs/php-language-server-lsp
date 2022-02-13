@@ -13,11 +13,11 @@ class HTTPTest extends TestCase
         $actual = [];
 
         foreach ($chunks as $chunk) {
-            $actual = [...$actual, ...iterator_to_array(HTTP::recv($chunk))];
+            $actual = [...$actual, ...iterator_to_array(HTTP::recv($chunk), false)];
         }
 
         if ($chunks) {
-            $this->assertEquals($actual, $expect);
+            $this->assertEquals($expect, $actual);
         }
     }
 
@@ -28,12 +28,31 @@ class HTTPTest extends TestCase
 
     public function testStreamReveiveExact()
     {
-        $this->assertReceive("Content-length: 10\r\n\r\n0123456789", ['0123456789']);
+        $this->assertRecvChunks(["X-client: vi\r\nContent-length: 10\r\n\r\n0123456789"], ['0123456789']);
+        $this->assertRecvChunks(["Content-length: 10\r\n\r\n0123456789"], ['0123456789']);
     }
 
-    public function testStreamReveiveBuffered()
+    public function testStreamReveiveEmptyThenExact()
     {
-        $this->assertReceive("Content-length: 10\r\n\r\n012345678", []);
-        $this->assertReceive("9", ['0123456789']);
+        $this->assertRecvChunks(['', "Content-length: 10\r\n\r\n0123456789"], ['0123456789']);
     }
+
+    public function testStreamReveiveForeignHeaders()
+    {
+        $this->assertRecvChunks(["X-client: vi\r\nContent-length: 10\r\n\r\n0123456789"], ['0123456789']);
+    }
+
+    public function testStreamReveiveOneInChunks()
+    {
+        $this->assertRecvChunks(["Content-length: 10\r\n\r\n012345678", '9'], ['0123456789']);
+    }
+
+    public function testStreamReveiveManyInOneChunk()
+    {
+        $this->assertRecvChunks(
+            [str_repeat("Content-length: 10\r\n\r\n0123456789", 3)],
+            ['0123456789', '0123456789', '0123456789'],
+        );
+    }
+
 }

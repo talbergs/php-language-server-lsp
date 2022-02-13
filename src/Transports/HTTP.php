@@ -7,7 +7,6 @@ namespace Talbergs\Transports;
 final class HTTP
 {
     private static string $buffer = '';
-    private static int $received = 0;
     private static int $toReceive = 0;
 
     public static function recv(string $streamChunk): \Generator
@@ -17,23 +16,40 @@ final class HTTP
         }
 
         if (static::$toReceive === 0) {
-            // open buffer, find content length
-        } else {
-            $streamChunk;
-            // read needed bytes.
+            static::$buffer = '';
+            return yield from static::recv(static::consumeHeader($streamChunk));
         }
 
-        // return yield from static::recv($streamChunk);
+        $arrivedLen = strlen($streamChunk);
 
-        // return explode("\r\n\r\n", $body)[1];
-        $j = explode("\r\n\r\n", $streamChunk)[1];
-        // $j = mb_convert_encoding($j, 'ISO-8859-1', 'UTF-8');
-        // l($j);
-        // $jj = json_decode($j,true);
+        if ($arrivedLen < static::$toReceive) {
+            static::$toReceive -= $arrivedLen;
+            static::$buffer = static::$buffer . $streamChunk;
+            return;
+        }
 
-        // ksort($jj);
-        // l((isset($jj['id']) ? '>>- ' : '>-- ').json_encode($jj));
-        yield $j;
+        if ($arrivedLen > static::$toReceive) {
+            $lastSegment = substr($streamChunk, 0, static::$toReceive);
+            $nextSegment = substr($streamChunk, static::$toReceive);
+
+            yield static::$buffer . $lastSegment;
+
+            static::$toReceive = 0;
+            return yield from static::recv($nextSegment);
+        }
+
+        static::$toReceive = 0;
+        yield static::$buffer . $streamChunk;
+    }
+
+    private static function consumeHeader(string $streamChunk): string
+    {
+        $headerLen = stripos($streamChunk, "\r\n\r\n") + 4;
+        $headers = substr($streamChunk, 0, $headerLen);
+        preg_match('/Content-Length: (?<length>\d+)/i', $headers, $mathces);
+        static::$toReceive = (int) $mathces['length'];
+
+        return substr($streamChunk, $headerLen);
     }
 
     public static function send(string $body): string
