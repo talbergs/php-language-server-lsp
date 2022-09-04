@@ -10,7 +10,6 @@ use React\Stream\ReadableResourceStream;
 use React\Stream\WritableResourceStream;
 use \React\EventLoop\Loop;
 use Talbergs\LSP\CompletionList;
-use Talbergs\LSP\CompletionOptions\CompletionOptions;
 use Talbergs\LSP\CompletionParams;
 use Talbergs\LSP\DidChangeConfigurationParams;
 use Talbergs\LSP\DidChangeTextDocumentParams;
@@ -51,13 +50,6 @@ final class Kernel
 
     private static function handleInput(string $streamData)
     {
-        if (defined('A')) {
-            sleep(1);
-        l($streamData);
-        return;
-        }
-        l(__METHOD__);
-
         foreach (HTTP::recv($streamData) as $data) {
             $data = JsonRpc::recv($data);
 
@@ -73,18 +65,18 @@ final class Kernel
 
             if ($id !== null) {
                 match ($method) {
-                'initialize' => self::handleInitializeRequest($data['id'], InitializeParams::fromArr($params)),
+                    'initialize' => self::handleInitializeRequest($data['id'], InitializeParams::fromArr($params)),
                     'shutdown' => self::handleShutdownRequest($data['id']),
                     'textDocument/hover' => self::handleHoverRequest($data['id'], HoverParams::fromArr($params)),
                     'textDocument/completion'  => self::handleCompletionRequest($data['id'], CompletionParams::fromArr($params)),
-            };
+                };
             } else {
                 match ($method) {
-                'initialized' =>  self::handleInitializedNotification(InitializedParams::fromArr($params)),
+                    'initialized' =>  self::handleInitializedNotification(InitializedParams::fromArr($params)),
                     'workspace/didChangeConfiguration' => self::handleDidChangeConfigurationNotification(DidChangeConfigurationParams::fromArr($params)),
                     'textDocument/didOpen' => self::handleTextDocumentDidOpenNotification(DidOpenTextDocumentParams::fromArr($params)),
                     'textDocument/didChange' => self::handleTextDocumentDidChangeNotification(DidChangeTextDocumentParams::fromArr($params)),
-            };
+                };
             }
         }
     }
@@ -117,7 +109,6 @@ final class Kernel
     public static function handleTextDocumentDidChangeNotification(DidChangeTextDocumentParams $params)
     {
         Document::update($params);
-        // l($params);
         // l(__METHOD__);
         // Send a notification.
         // $json = '{"uri":"file:///home/ada/Projects/php-language-server-lsp/php-test-file.sense","diagnostics":[{"range":{"start":{"line":2,"character":0},"end":{"line":2,"character":2}},"message":"Undefined function \'bs\'.","severity":1,"code":1010,"source":"intelephense"}]}';
@@ -159,23 +150,33 @@ final class Kernel
 
     public static function handleHoverRequest(int $id, HoverParams $params)
     {
-        $code = file_get_contents($params->textDocument->uri);
-        $tree = self::parse($code);
-        $p1 = new \TS\Point($params->position->line, $params->position->character);
+        $hoveredNode = Document::findNode($params->textDocument->uri, $params->position);
+        $code = Document::getCode($params->textDocument->uri);
 
-        $node = $tree->getRootNode()->getNamedDescendantForPointRange($p1, $p1);
-        l($node);
+        $doc = implode(PHP_EOL, [
+            $hoveredNode->text($code),
+            $hoveredNode->toString(),
+        ]);
 
-$doc = 'no';
+        l($hoveredNode->getParent()->getType());
+        [
+            "qualified_name"=>["function_call", "constant", "class_name"],
+            "variable_name"=>["variable"],
+            "member_call_expression" => ["(new AAA())->call()"],
+            "scoped_call_expression" => ["AAAA::call()"]
+        ];
+
+
         // Looking for function calls to doc.
-        if ($node->getParent()->getParent()->getType() === 'function_call_expression') {
-            $functionName = $node->text($code);
-            $doc = match ($functionName) {
-                'abs' => 'abs functon yeey',
-                'min' => 'min functon yass,',
-                default => 'no documentation was found',
-            };
-        }
+
+        // if ($hoveredNode->getParent()->getParent()->getType() === 'function_call_expression') {
+        //     $functionName = $hoveredNode->text($code);
+        //     $doc = match ($functionName) {
+        //         'abs' => 'abs functon yeey',
+        //         'min' => 'min functon yass,',
+        //         default => 'no documentation was found',
+        //     };
+        // }
 
         $hover = new Hover();
         $contents = new MarkupContent();

@@ -5,7 +5,14 @@ abs(-1);
 min(-1);
 yass(-1);
 
-class ASD {}
+class ASD {
+    function aassdd(string $eee) {
+    }
+}
+
+{
+$abs   ;
+}
 
 $var111 = 1;
 $var222 = 2;
